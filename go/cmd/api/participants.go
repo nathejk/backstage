@@ -119,7 +119,7 @@ func (app *application) requestPaymentParticipantHandler(w http.ResponseWriter, 
 		app.badRequestResponse(w, r, err)
 		return
 	}
-	link := "https://www.mobilepay.dk/erhverv/betalingslink/betalingslink-svar?phone=775771&amount=1&lock=1&comment=" + id
+	link := "https://www.mobilepay.dk/erhverv/betalingslink/betalingslink-svar?phone=775771&amount=50&lock=1&comment=" + id
 	err = app.sms.Send(input.Phone, link)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
