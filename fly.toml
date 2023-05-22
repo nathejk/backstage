@@ -1,0 +1,17 @@
+# fly.toml app configuration file generated for snowy-star-8184 on 2023-05-22T14:02:49Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = "snowy-star-8184"
+primary_region = "ams"
+
+[build]
+  image = "nathejk/backstage:main.3"
+
+[http_service]
+  internal_port = 80
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
