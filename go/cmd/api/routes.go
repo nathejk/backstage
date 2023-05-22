@@ -3,6 +3,7 @@ package main
 import (
 	"expvar"
 	"net/http"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -30,5 +31,25 @@ func (app *application) routes() http.Handler {
 
 	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
 
-	return app.metrics(app.authenticate(router))
+	mux := http.NewServeMux()
+	mux.Handle("/", http.FileServer(SpaFileSystem(http.Dir(app.config.webroot))))
+	mux.Handle("/api/", app.metrics(app.authenticate(router)))
+
+	return mux
+	//return app.metrics(app.authenticate(router))
+}
+
+type spaFileSystem struct {
+	root http.FileSystem
+}
+
+func (fs *spaFileSystem) Open(name string) (http.File, error) {
+	f, err := fs.root.Open(name)
+	if os.IsNotExist(err) {
+		return fs.root.Open("index.html")
+	}
+	return f, err
+}
+func SpaFileSystem(fs http.FileSystem) *spaFileSystem {
+	return &spaFileSystem{root: fs}
 }

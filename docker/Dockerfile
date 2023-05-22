@@ -36,7 +36,7 @@ FROM base AS build
 
 # build service
 RUN GOARCH=amd64 CGO_ENABLED=1 GOOS=linux \
-	go build -a -ldflags="-w -s" -o application nathejk.dk/cmd/api
+	go build -a -ldflags '-extldflags "-static"' -ldflags="-w -s" -o application nathejk.dk/cmd/api
 
 
 ## UI
@@ -72,22 +72,34 @@ RUN npm run build
 
 #
 # PROD
-FROM alpine:3.17.2 AS prod
+#FROM alpine:3.18.0 AS prod
+FROM ubuntu:23.04 AS prod
 
 ARG CI_VERSION
 ENV SENTRY_RELEASE=$CI_VERSION
 
+ENV DEBIAN_FRONTEND noninteractive
 RUN set -eux; \
-	apk add --update --no-cache \
-	    bash \
-	    coreutils \
-	    libc6-compat \
-	    ca-certificates \
-        && \
-	rm -rf /tmp/* /var/cache/apk/*
+	apt -qq update && \
+    apt install -qq -y --no-install-recommends \
+        bash \
+        ca-certificates && \
+    apt -qq clean
+#RUN set -eux; \
+#	apk add --update --no-cache \
+#	    bash \
+#	    coreutils \
+#	    libc6-compat \
+#        gcompat \
+#	    ca-certificates \
+#        && \
+#	rm -rf /tmp/* /var/cache/apk/*
+
+#RUN mkdir -p /lib64 && ln -s /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
 
 WORKDIR /app
 COPY --from=build /app/application /api
+COPY /migrations /app/migrations
 COPY --from=ui-builder /app/dist /www
 
 #HEALTHCHECK --interval=30s --timeout=15s --start-period=900s --retries=3 CMD test -f /tmp/healthy
