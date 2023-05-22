@@ -10,7 +10,7 @@ export default {
     const route = useRoute()
 
     const initialState = {
-      name: 'test',
+      name: '',
       address: '',
       email: '',
       phone: '',
