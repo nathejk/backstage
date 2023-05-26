@@ -181,7 +181,7 @@ func (m ParticipantModel) Delete(id int64) error {
 
 func (m ParticipantModel) GetAll(name string, genres []string, filters Filters) ([]*Participant, Metadata, error) {
 	query := fmt.Sprintf(`
-		SELECT count(*) OVER(), id, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, (SELECT SUM(amount) FROM payment WHERE message = uuid) > 50
+		SELECT count(*) OVER(), id, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) >= 50
 		FROM participant
 		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
 		ORDER BY %s %s, id ASC
