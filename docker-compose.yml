@@ -37,6 +37,7 @@ services:
     environment:
       DB_DSN: postgres://bruger:kodeord@db/productcatalog?sslmode=disable
       SMS_DSN: cpsms://TOKEN@api.cpsms.dk
+      MOBILEPAY_REPORT_TOKEN: TOKEN
       SMTP_HOST: mail
       SMTP_PORT: 1025
     volumes:

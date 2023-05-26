@@ -19,6 +19,10 @@ type Models struct {
 		Delete(id int64) error
 		GetAll(string, []string, Filters) ([]*Participant, Metadata, error)
 	}
+	Payments interface {
+		Insert(*Payment) error
+		Latest() time.Time
+	}
 	Permissions interface {
 		AddForUser(int64, ...string) error
 		GetAllForUser(int64) (Permissions, error)
@@ -39,6 +43,7 @@ type Models struct {
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Participants: ParticipantModel{DB: db},
+		Payments:     PaymentModel{DB: db},
 		Permissions:  PermissionModel{DB: db},
 		Tokens:       TokenModel{DB: db},
 		Users:        UserModel{DB: db},

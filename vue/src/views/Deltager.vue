@@ -77,7 +77,7 @@ export default {
   },
   data() {
     return {
-      paying: ref(false),
+      saved: ref(false),
       teams: ref([
         { slug: 'start', title: 'Primært start (Tommy, Susan, Martin, Dennis)' },
         { slug: 'checkpoint', title: 'Primært checkpoint (Niels Erik, Tobias, Niels, Jakob)' },
@@ -121,7 +121,13 @@ export default {
       return this.$route.params.id
     },
     buttonLabel() {
-      return this.paid ? 'Opdater' : 'Tilmeld'
+      return this.state.paid ? 'Opdater' : 'Tilmeld'
+    },
+    paying() {
+      return this.saved && !this.state.paid
+    },
+    receipt() {
+      return this.saved && this.state.paid
     },
   },
   methods: {
@@ -151,14 +157,14 @@ export default {
         }
 
         const rsp = await axios.patch('/api/v1/participant/' + this.userId, data) //, { withCredentials: true })
-          this.paying = true
+          this.saved = true
       } else {
         const rsp = await axios.post('/api/v1/participant', Object.assign({}, this.state)) //, { withCredentials: true })
         if (rsp.status == 201) {
           //this.team = rsp.dat
           //rsp.body.uuid
           this.$router.push({ name: 'deltager', params: { id: rsp.data.participant.uuid }, replace: true })
-          this.paying = true
+          this.saved = true
         }
       }
 
@@ -175,10 +181,13 @@ export default {
     <v-row justify="center">
       <v-col cols="8">
         <form v-if="paying" @submit.prevent="pay">
-          <p class="pb-3">Det koster 50,- kr at deltage som skal indbetales på MobilePay - når betalingen er gennemført er den registreret og dette vindue kan lukkes.</p>
+          <p class="pb-3">Det koster 50,- kr at deltage som skal indbetales på MobilePay - der kan gå op til 10 minutter før betalingen er registreret.</p>
           <v-text-field v-model="state.mobilepay" label="Telefonnummer" prepend-icon="mdi-cellphone-basic"></v-text-field>
-        <v-btn class="me-4" type="submit">Send betalings SMS</v-btn>
+          <v-btn class="me-4" type="submit">Send betalings SMS</v-btn>
         </form>
+        <div v-else-if="receipt">
+          <p class="pb-3">Dine oplysninger er opdateret.</p>
+        </div>
         <form v-else @submit.prevent="save">
         <v-text-field v-model="state.name"    label="Navn" density="compact" :error-messages="v$.name.$errors.map(e => e.$message)" @input="v$.name.$touch"
       @blur="v$.name.$touch"></v-text-field>
@@ -192,6 +201,7 @@ export default {
         <v-select v-model="state.seatCount" clearable label="Hvis du medbringer egen bil, hvor mange ekstra pladser har du" density="compact" :items="seatCounts" item-title="title" item-value="slug" :error-messages="v$.seatCount.$errors.map(e => e.$message)"></v-select>
         <v-select v-model="state.info" clearable label="Må vi sende information på SMS" density="compact" :items="yesNo" item-title="title" item-value="slug" :error-messages="v$.info.$errors.map(e => e.$message)"></v-select>
         <v-select v-model="state.video" clearable label="Har du lyst til at medvirke i årets videoer" density="compact" :items="videos" item-title="title" item-value="slug" :error-messages="v$.video.$errors.map(e => e.$message)"></v-select>
+        <p class="py-3">OBS. Ved tilmelding giver man samtidig også fototilladelse.</p>
         <v-btn class="me-4" type="submit">{{ buttonLabel }}</v-btn>
         </form>
       </v-col>

@@ -77,7 +77,7 @@ func (m ParticipantModel) Get(id string) (*Participant, error) {
 	}
 
 	query := `
-		SELECT id, uuid, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) > 50 FROM participant
+		SELECT id, uuid, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) >= 50 FROM participant
 		WHERE uuid = $1`
 
 	var p Participant

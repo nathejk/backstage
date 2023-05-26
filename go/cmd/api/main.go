@@ -27,7 +27,7 @@ var (
 	version = vcs.Version()
 )
 
-// Define a config struct to hold all the configuration settings for our application.
+// efine a config struct to hold all the configuration settings for our application.
 type config struct {
 	port    int
 	env     string
@@ -47,6 +47,9 @@ type config struct {
 	}
 	sms struct {
 		dsn string
+	}
+	mobilepay struct {
+		reportToken string
 	}
 }
 
@@ -68,6 +71,7 @@ func main() {
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	flag.StringVar(&cfg.webroot, "webroot", getEnv("WEBROOT", "/www"), "Static web root")
+	flag.StringVar(&cfg.mobilepay.reportToken, "mobilepay-report-token", os.Getenv("MOBILEPAY_REPORT_TOKEN"), "Report API key created in Mobilepay Portal")
 
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DB_DSN"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
@@ -126,6 +130,13 @@ func main() {
 		sms:    sms,
 	}
 
+	go func() {
+		logger.PrintInfo("Starting MobilePay sync", nil)
+		for {
+			app.syncMobilePay()
+			time.Sleep(1 * time.Minute)
+		}
+	}()
 	logger.PrintFatal(app.serve(), nil)
 }
 
