@@ -71,6 +71,13 @@ func (m ParticipantModel) Insert(p *Participant) error {
 	return m.DB.QueryRow(query, args...).Scan(&p.ID, &p.CreatedAt, &p.Version)
 }
 
+func (m ParticipantModel) GetByPayment(p *Payment) (*Participant, error) {
+	if p == nil {
+		return nil, ErrRecordNotFound
+	}
+	return m.Get(p.Message)
+}
+
 func (m ParticipantModel) Get(id string) (*Participant, error) {
 	if id == "" {
 		return nil, ErrRecordNotFound
@@ -97,7 +104,6 @@ func (m ParticipantModel) Get(id string) (*Participant, error) {
 		&p.Info,
 		&p.Video,
 		&p.Paid,
-	//pq.Array(participant.Genres)}
 	)
 	// Handle any errors. If there was no matching participant found, Scan() will return
 	// a sql.ErrNoRows error. We check for this and return our custom ErrRecordNotFound

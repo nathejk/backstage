@@ -181,7 +181,7 @@ export default {
     <v-row justify="center">
       <v-col cols="8">
         <form v-if="paying" @submit.prevent="pay">
-          <p class="pb-3">Det koster 50,- kr at deltage som skal indbetales på MobilePay - der kan gå op til 10 minutter før betalingen er registreret.</p>
+          <p class="pb-3">Det koster 50,- kr at deltage som skal indbetales på MobilePay - der kan gå op til 10 minutter før betalingen er registreret, herefter vil du modtage en SMS.</p>
           <v-text-field v-model="state.mobilepay" label="Telefonnummer" prepend-icon="mdi-cellphone-basic"></v-text-field>
           <v-btn class="me-4" type="submit">Send betalings SMS</v-btn>
         </form>

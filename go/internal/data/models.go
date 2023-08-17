@@ -15,6 +15,7 @@ type Models struct {
 	Participants interface {
 		Insert(*Participant) error
 		Get(id string) (*Participant, error)
+		GetByPayment(p *Payment) (*Participant, error)
 		Update(*Participant) error
 		Delete(id int64) error
 		GetAll(string, []string, Filters) ([]*Participant, Metadata, error)

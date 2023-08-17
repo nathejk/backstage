@@ -39,8 +39,13 @@ func (app *application) syncMobilePay() error {
 		return payments[i].Timestamp.Before(payments[j].Timestamp)
 	})
 	for _, payment := range payments {
-		app.models.Payments.Insert(&payment)
-
+		if err = app.models.Payments.Insert(&payment); err != nil {
+			continue
+		}
+		participant, _ := app.models.Participants.GetByPayment(&payment)
+		if participant != nil {
+			app.sms.Send(participant.Phone, "Tak for din gøglertilmelding, du hører fra os - Vi ses i mørket...")
+		}
 	}
 	return nil
 }
