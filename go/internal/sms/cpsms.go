@@ -25,15 +25,16 @@ func (s *cpsms) Send(phone, message string) error {
 		From    string `json:"from"`
 		Message string `json:"message"`
 	}
+	type cpsmsError struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
 	type cpsmsSingleRecipientResponse struct {
 		Success []struct {
 			To   string `json:"to"`
 			Cost int    `json:"cost"`
 		} `json:"success"`
-		Error []struct {
-			Code    int    `json:"code"`
-			Message string `json:"message"`
-		} `json:"error"`
+		Error *cpsmsError `json:"error"`
 	}
 
 	jsonStr, _ := json.Marshal(cpsmsSingleRecipientRequest{
@@ -59,5 +60,5 @@ func (s *cpsms) Send(phone, message string) error {
 	if body.Error == nil {
 		return nil
 	}
-	return fmt.Errorf("CPSMS Error sending to %q", phone)
+	return fmt.Errorf("CPSMS Error %d: %q", body.Error.Code, body.Error.Message)
 }
