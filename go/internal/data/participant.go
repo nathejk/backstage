@@ -50,6 +50,8 @@ type Participant struct {
 	Info      string    `json:"info"`
 	Video     string    `json:"video"`
 	Paid      bool      `json:"paid"`
+	Diet      string    `json:"diet"`
+	Tshirt    string    `json:"tshirt"`
 }
 
 func (p *Participant) Validate(v validator.Validator) {
@@ -64,10 +66,10 @@ type ParticipantModel struct {
 func (m ParticipantModel) Insert(p *Participant) error {
 	p.UUID = uuid.New().String()
 	query := `
-		INSERT INTO participant (name, address, email, phone, team, days, transport, seatCount, info, video, uuid)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		INSERT INTO participant (name, address, email, phone, team, days, transport, seatCount, info, video, uuid, diet, tshirt)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		RETURNING id, created_at, version`
-	args := []any{p.Name, p.Address, p.Email, p.Phone, p.Team, pq.Array(p.Days), p.Transport, p.SeatCount, p.Info, p.Video, p.UUID}
+	args := []any{p.Name, p.Address, p.Email, p.Phone, p.Team, pq.Array(p.Days), p.Transport, p.SeatCount, p.Info, p.Video, p.UUID, p.Diet, p.Tshirt}
 	return m.DB.QueryRow(query, args...).Scan(&p.ID, &p.CreatedAt, &p.Version)
 }
 
@@ -84,7 +86,7 @@ func (m ParticipantModel) Get(id string) (*Participant, error) {
 	}
 
 	query := `
-		SELECT id, uuid, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) >= 50 FROM participant
+		SELECT id, uuid, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, diet, tshirt, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) >= 50 FROM participant
 		WHERE uuid = $1`
 
 	var p Participant
@@ -103,6 +105,8 @@ func (m ParticipantModel) Get(id string) (*Participant, error) {
 		&p.SeatCount,
 		&p.Info,
 		&p.Video,
+		&p.Diet,
+		&p.Tshirt,
 		&p.Paid,
 	)
 	// Handle any errors. If there was no matching participant found, Scan() will return
@@ -134,6 +138,8 @@ func (m ParticipantModel) Update(p *Participant) error {
 			seatCount = $10,
 			info = $11,
 			video = $12,
+			diet = $13,
+			tshirt = $14,
 			version = version + 1
 		WHERE id = $1 AND version = $2
 		RETURNING version`
@@ -151,6 +157,8 @@ func (m ParticipantModel) Update(p *Participant) error {
 		p.SeatCount,
 		p.Info,
 		p.Video,
+		p.Diet,
+		p.Tshirt,
 	}
 	// Execute the SQL query. If no matching row could be found, we know the record
 	// version has changed (or the record has been deleted) and we return ErrEditConflict error.
@@ -187,7 +195,7 @@ func (m ParticipantModel) Delete(id int64) error {
 
 func (m ParticipantModel) GetAll(name string, genres []string, filters Filters) ([]*Participant, Metadata, error) {
 	query := fmt.Sprintf(`
-		SELECT count(*) OVER(), id, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) >= 50
+		SELECT count(*) OVER(), id, created_at, version, name, address, email, phone, team, days, transport, seatCount, info, video, diet, tshirt, (SELECT COALESCE(SUM(amount), 0) FROM payment WHERE message = uuid) >= 50
 		FROM participant
 		WHERE (LOWER(name) = LOWER($1) OR $1 = '')
 		ORDER BY %s %s, id ASC
@@ -224,6 +232,8 @@ func (m ParticipantModel) GetAll(name string, genres []string, filters Filters) 
 			&p.SeatCount,
 			&p.Info,
 			&p.Video,
+			&p.Diet,
+			&p.Tshirt,
 			&p.Paid,
 		)
 		if err != nil {

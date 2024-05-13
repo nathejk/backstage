@@ -54,7 +54,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst any
 	// field which cannot be mapped to the target destination, the decoder will return
 	// an error instead of just ignoring the field.
 	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields()
+	//	dec.DisallowUnknownFields()
 
 	// Decode the request body into the target destination.
 	err := dec.Decode(dst)

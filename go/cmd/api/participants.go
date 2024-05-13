@@ -51,8 +51,8 @@ func (app *application) createParticipantHandler(w http.ResponseWriter, r *http.
 		Days      []string `json:"days"`
 		Transport string   `json:"transport"`
 		SeatCount string   `json:"seatCount"`
-		Info      string   `json:"info"`
-		Video     string   `json:"video"`
+		Diet      string   `json:"diet"`
+		Tshirt    string   `json:"tshirt"`
 	}
 
 	if err := app.readJSON(w, r, &input); err != nil {
@@ -69,8 +69,8 @@ func (app *application) createParticipantHandler(w http.ResponseWriter, r *http.
 		Days:      input.Days,
 		Transport: input.Transport,
 		SeatCount: input.SeatCount,
-		Info:      input.Info,
-		Video:     input.Video,
+		Diet:      input.Diet,
+		Tshirt:    input.Tshirt,
 	}
 
 	v := validator.New()
@@ -119,7 +119,16 @@ func (app *application) requestPaymentParticipantHandler(w http.ResponseWriter, 
 		app.badRequestResponse(w, r, err)
 		return
 	}
-	link := "https://www.mobilepay.dk/erhverv/betalingslink/betalingslink-svar?phone=775771&amount=50&lock=1&comment=" + id
+	participant, err := app.models.Participants.Get(id)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+	amount := 50
+	if participant.Tshirt != "ingen" {
+		amount += 175
+	}
+	link := fmt.Sprintf("https://www.mobilepay.dk/erhverv/betalingslink/betalingslink-svar?phone=775771&amount=%d&lock=1&comment=%s", amount, id)
 	err = app.sms.Send(input.Phone, link)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

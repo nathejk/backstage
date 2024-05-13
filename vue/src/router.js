@@ -17,6 +17,11 @@ const routes = [
     component: () => import("./views/Deltager.vue"),
   },
   {
+    path: "/oversigt",
+    name: "oversigt",
+    component: () => import("./views/Oversigt.vue"),
+  },
+  {
     path: "/:catchAll(.*)",
     component: () => import("./views/NotFound.vue"),
   },

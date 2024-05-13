@@ -18,8 +18,8 @@ export default {
       days: ['friday', 'saturday', 'sunday'],
       transport: null,
       seatCount: null,
-      info: null,
-      video: null,
+      diet: null,
+      tshirt: null,
     }
 
     const load = async() => {
@@ -59,8 +59,8 @@ export default {
       days: { required },
       transport: { required },
       seatCount: { },
-      info: { required },
-      video: { required },
+      diet: { required },
+      tshirt: { required },
     }
 
     const v$ = useVuelidate(rules, state)
@@ -79,10 +79,10 @@ export default {
     return {
       saved: ref(false),
       teams: ref([
-        { slug: 'start', title: 'Primært start (Tommy, Susan, Martin, Dennis)' },
-        { slug: 'checkpoint', title: 'Primært checkpoint (Niels Erik, Tobias, Niels, Jakob)' },
-        { slug: 'open', title: 'Placer mig' },
-        { slug: 'logistik', title: 'Logistik (forbeholdt gøglerlogistik, efter nærmere aftale med Mismis)' },
+        { slug: 'open', title: 'Ingen holdning' },
+        { slug: 'night', title: 'Vil gerne stå på checkpoints om natten' },
+        { slug: 'day', title: 'Vil ikke stå på checkpoints om natten' },
+        { slug: 'logistik', title: 'Logistik (kun efter aftale)' },
       ]),
       days: ref([
         { slug: "friday", title: 'Fredag' },
@@ -91,7 +91,6 @@ export default {
       ]),
       transports: ref([
         { slug: 'owncar', title: 'Jeg medbringer egen bil' },
-        { slug: 'haveseat', title: 'Jeg har en plads i en bil' },
         { slug: 'needseat', title: 'Jeg har brug for plads i en bil' },
       ]),
       seatCounts: ref([
@@ -100,9 +99,20 @@ export default {
         { slug: '3', title: '3' },
         { slug: '4', title: '4' },
         { slug: '5', title: '5' },
-        { slug: '6', title: '6' },
-        { slug: '7', title: '7' },
         { slug: '0', title: 'Jeg har ikke ekstra plads' },
+      ]),
+      diet: ref([
+        { slug: 'all', title: 'Ingen særlige præferencer' },
+        { slug: 'vegetarian', title: 'Jeg vil gerne have vegetarmad' },
+      ]),
+      tshirt: ref([
+        { slug: 'ingen', title: 'Ingen t-shirt' },
+        { slug: 'xs', title: 'X-Small' },
+        { slug: 's', title: 'Small' },
+        { slug: 'm', title: 'Medium' },
+        { slug: 'l', title: 'Large' },
+        { slug: 'xl', title: 'X-Large' },
+        { slug: '2xl', title: 'XX-Large' },
       ]),
       yesNo: ref([
         { slug: 'yes', title: 'JA' },
@@ -152,8 +162,8 @@ export default {
             days:this.state.days,
             transport:this.state.transport,
             seatCount:this.state.seatCount || "",
-            info:this.state.info,
-            video:this.state.video,
+            diet:this.state.diet,
+            tshirt:this.state.tshirt,
         }
 
         const rsp = await axios.patch('/api/v1/participant/' + this.userId, data) //, { withCredentials: true })
@@ -180,8 +190,20 @@ export default {
   <v-container class="bg-surface-variant mb-6">
     <v-row justify="center">
       <v-col cols="8">
+      <ul class="text-left ms-5">
+          <li>Du skal være fyldt 17 år for at deltage som gøgler på Nathejk.</li>
+          <li>Det koster 50 kr., som betales med MobilePay ved tilmeldingen.</li>
+          <li>Ved tilmeldingen giver du automatisk fototilladelse.</li>
+          <li>Ved tilmeldingen giver du tilladelse til, at vi må kontakte dig på e-mail, telefon og sms i forbindelse med Nathejk.</li>
+          <li>Efter tilmeldingen bliver du inviteret til gøglernes Facebook-gruppe, hvor vi planlægger og koordinerer vores indsats.</li>
+          <li>Du skal kunne holde på en hemmelighed, da spejdere og banditter ikke må få kendskab til løbsområdet, indholdet på posterne eller gemmeting før tid.</li>
+          <li>Du skal som udgangspunkt selv anskaffe dit kostume, så du kan udfylde din rolle på posterne. Du får mere information når vi nærmer os Nathejk samt masser af hjælp fra de andre gøglere.</li>
+      </ul>
+      <p class="text-left py-3">Det er ikke et krav at deltage i Gøglerweekenden og Hjælpermødet, men det er en god idé, hvis du vil lære de andre gøglere at kende og forstå, præcis hvad din rolle er på posterne. Det er selvfølgelig et krav at kunne komme til Nathejk, men hvis du ikke kan være med hele tiden fra fredag aften til søndag formiddag, kan du i tilmeldingen angive hvilke dage, du er med.</p>
+      <p class="text-left py-3">Har du spørgsmål er du velkommen til at kontakte gøglerchefen Niels Jakob på njl@nathejk.dk</p>
+
         <form v-if="paying" @submit.prevent="pay">
-          <p class="pb-3">Det koster 50,- kr at deltage som skal indbetales på MobilePay - der kan gå op til 10 minutter før betalingen er registreret, herefter vil du modtage en SMS.</p>
+          <p class="pb-3">Det koster 50,- kr at deltage som skal indbetales på MobilePay - betalinger registreres manuelt.</p>
           <v-text-field v-model="state.mobilepay" label="Telefonnummer" prepend-icon="mdi-cellphone-basic"></v-text-field>
           <v-btn class="me-4" type="submit">Send betalings SMS</v-btn>
         </form>
@@ -199,9 +221,8 @@ export default {
         <v-select v-model="state.days" chips multiple label="Deltager" density="compact" :items="days" item-title="title" item-value="slug" :error-messages="v$.days.$errors.map(e => e.$message)"></v-select>
         <v-select v-model="state.transport" clearable label="Transport under Nathejk" density="compact" :items="transports" item-title="title" item-value="slug" :error-messages="v$.transport.$errors.map(e => e.$message)"></v-select>
         <v-select v-model="state.seatCount" clearable label="Hvis du medbringer egen bil, hvor mange ekstra pladser har du" density="compact" :items="seatCounts" item-title="title" item-value="slug" :error-messages="v$.seatCount.$errors.map(e => e.$message)"></v-select>
-        <v-select v-model="state.info" clearable label="Må vi sende information på SMS" density="compact" :items="yesNo" item-title="title" item-value="slug" :error-messages="v$.info.$errors.map(e => e.$message)"></v-select>
-        <v-select v-model="state.video" clearable label="Har du lyst til at medvirke i årets videoer" density="compact" :items="videos" item-title="title" item-value="slug" :error-messages="v$.video.$errors.map(e => e.$message)"></v-select>
-        <p class="py-3">OBS. Ved tilmelding giver man samtidig også fototilladelse.</p>
+        <v-select v-model="state.diet" clearable label="Har du specielle præferencer angående maden på Nathejk" density="compact" :items="diet" item-title="title" item-value="slug" :error-messages="v$.diet.$errors.map(e => e.$message)"></v-select>
+        <v-select v-model="state.tshirt" clearable label="Ønsker du at købe en års t-shirt (DKK 175,-) udleveres på Nathejk" density="compact" :items="tshirt" item-title="title" item-value="slug" :error-messages="v$.tshirt.$errors.map(e => e.$message)"></v-select>
         <v-btn class="me-4" type="submit">{{ buttonLabel }}</v-btn>
         </form>
       </v-col>

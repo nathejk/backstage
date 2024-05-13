@@ -7,7 +7,7 @@ app = "snowy-star-8184"
 primary_region = "ams"
 
 [build]
-  image = "nathejk/backstage:main.3"
+  image = "nathejk/backstage:main.9"
 
 [http_service]
   internal_port = 80
