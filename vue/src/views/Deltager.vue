@@ -60,7 +60,7 @@ export default {
       transport: { required },
       seatCount: { },
       diet: { required },
-      tshirt: { required },
+      //tshirt: { required },
     }
 
     const v$ = useVuelidate(rules, state)
