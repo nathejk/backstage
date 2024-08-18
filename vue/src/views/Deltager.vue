@@ -163,7 +163,7 @@ export default {
             transport:this.state.transport,
             seatCount:this.state.seatCount || "",
             diet:this.state.diet,
-            tshirt:this.state.tshirt,
+            //tshirt:this.state.tshirt,
         }
 
         const rsp = await axios.patch('/api/v1/participant/' + this.userId, data) //, { withCredentials: true })
