@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -126,7 +127,8 @@ func (app *application) requestPaymentParticipantHandler(w http.ResponseWriter, 
 	}
 	amount := 50
 	if participant.Tshirt != "ingen" {
-		amount += 175
+		log.Println("t-shirt")
+		//amount += 175
 	}
 	link := fmt.Sprintf("https://www.mobilepay.dk/erhverv/betalingslink/betalingslink-svar?phone=775771&amount=%d&lock=1&comment=%s", amount, id)
 	err = app.sms.Send(input.Phone, link)
