@@ -1,8 +1,11 @@
-version: '3.4'
-
 volumes:
   ui-node_modules:
   api:
+
+networks:
+  local:
+  traefik:
+    external: true
 
 services:
   gw:
@@ -12,8 +15,13 @@ services:
       PROXY_MAPPINGS: >
         mail:8025
         sql:adminer:8080
-    ports:
-    - 80
+    networks:
+      - local
+      - traefik
+    labels:
+      traefik.enable: true
+      traefik.docker.network: traefik
+      traefik.http.routers.backstage.rule: Host(`backstage.dev.nathejk.dk`) || HostRegexp(`.+\.backstage\.dev\.nathejk\.dk`)
 
   ui:
     build:
@@ -28,6 +36,8 @@ services:
     - ui-node_modules:/app/node_modules
     depends_on:
     - gw
+    networks:
+      - local
 
   api:
     build:
@@ -35,14 +45,18 @@ services:
       target: dev
       dockerfile: docker/Dockerfile
     environment:
+      BASEURL: http://ui.backstage.dev.nathejk.dk
       DB_DSN: postgres://bruger:kodeord@db/productcatalog?sslmode=disable
       SMS_DSN: cpsms://TOKEN@api.cpsms.dk
+      PAYMENT_DSN: mobilepay://<CLIENTID>:<CLIENTSECRET>@<HOST>/<SUBSCRIPTION_ID>/<MSN>
       MOBILEPAY_REPORT_TOKEN: TOKEN
       SMTP_HOST: mail
       SMTP_PORT: 1025
     volumes:
     - .:/app
     - api:/go
+    networks:
+      - local
 
   db:
     image: postgres
@@ -51,14 +65,20 @@ services:
       POSTGRES_USER: bruger
       POSTGRES_PASSWORD: kodeord
       POSTGRES_DB: productcatalog
+    networks:
+      - local
 
   adminer:
     image: adminer
     restart: unless-stopped
     environment:
       ADMINER_DEFAULT_SERVER: db
+    networks:
+      - local
 
   mail:
     image: mailhog/mailhog:v1.0.1
     platform: linux/x86_64
     restart: unless-stopped
+    networks:
+      - local
