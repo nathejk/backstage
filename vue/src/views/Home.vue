@@ -7,7 +7,7 @@
           <v-card title="Gøgler" subtitle="maks 100 pladser" variant="tonal">
               <template v-slot:title>
         Gøgler
-                <!-- v-chip class="ma-2" color="red" text-color="white">Tilmelding lukket</v-chip -->
+                <v-chip class="ma-2" color="red" text-color="white">Tilmelding lukket</v-chip>
       </template>
             <v-card-text>
 
@@ -27,7 +27,7 @@ gøglerne får en briefing omkring posterne.</li>
 
             </v-card-text>
             <v-card-actions>
-              <v-btn variant="text" to="/tilmeld" :disabled="false">Gå til tilmelding</v-btn>
+              <v-btn variant="text" to="/tilmeld" :disabled="true">Gå til tilmelding</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
