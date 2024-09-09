@@ -223,7 +223,7 @@ export default {
         <v-select v-model="state.seatCount" clearable label="Hvis du medbringer egen bil, hvor mange ekstra pladser har du" density="compact" :items="seatCounts" item-title="title" item-value="slug" :error-messages="v$.seatCount.$errors.map(e => e.$message)"></v-select>
         <v-select v-model="state.diet" clearable label="Har du specielle præferencer angående maden på Nathejk" density="compact" :items="diet" item-title="title" item-value="slug" :error-messages="v$.diet.$errors.map(e => e.$message)"></v-select>
         <v-select v-if="false" v-model="state.tshirt" clearable label="Ønsker du at købe en års t-shirt (DKK 175,-) udleveres på Nathejk" density="compact" :items="tshirt" item-title="title" item-value="slug" :error-messages="v$.tshirt.$errors.map(e => e.$message)"></v-select>
-        <v-btn class="me-4" type="submit">{{ buttonLabel }}</v-btn>
+        <v-btn class="me-4" type="submit" :disabled="true">{{ buttonLabel }}</v-btn>
         </form>
       </v-col>
     </v-row>
